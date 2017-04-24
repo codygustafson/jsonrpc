@@ -24,6 +24,7 @@ module Jsonrpc
 
       if hash['id'] && !hash['id'].is_a?(String) && !hash['id'].nil? && !hash['id'].is_a?(Numeric)
         errors << "id must be a string, a number, or null."
+        hash['id']=nil
       end
 
       if hash['jsonrpc'] != '2.0'

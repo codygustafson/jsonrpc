@@ -1,0 +1,4 @@
+:exclude:
+  - lib/jsonrpc/version.rb
+:single_line_report: false
+:always_run: false

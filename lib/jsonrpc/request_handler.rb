@@ -1,64 +1,26 @@
 
 module Jsonrpc
 
-  module RequestHandler
-    INVALID_JSON_RESPONSE = {
-      'jsonrpc' => '2.0',
-      'id' => nil,
-      'error' => {
-        'code' => Jsonrpc::ErrorCodes::INVALID_JSON,
-        'message' => 'invalid json'
-      }
-    }
+  class RequestHandler
 
-    INVALID_REQUEST_RESPONSE = {
-      'jsonrpc' => '2.0',
-      'id' => nil,
-      'error' => {
-        'code' => Jsonrpc::ErrorCodes::INVALID_REQUEST,
-        'message' => 'Invalid Request'
-      }
-    }
+    # Any methods in here which you don't want to show
+    # through rpc should either be private or in this constant
+    NON_RPC_METHODS = ['rpc_send']
 
-    def self.run incoming_json
-      begin
-        data = JSON.parse(incoming_json)
-      rescue JSON::ParserError
-        return INVALID_JSON_RESPONSE
-      end
+    def initialize state, callbacks
+      @callbacks = callbacks
+    end
 
-      if !data.is_a?(Array)
-        data = [data]
-      elsif data.size > 0
-        batch = true
+    def rpc_send method, parameters
+      if rpc_methods.include?(method)
+        public_send(method.to_sym, parameters)
       else
-        return INVALID_REQUEST_RESPONSE
+        @callbacks.method_not_found
       end
+    end
 
-      results = []
-
-      data.each do |request|
-        validator = RequestValidator.new(request)
-        response_callbacks = ResponseCallbacks.new(request)
-
-        result = if validator.valid?
-          yield(request, response_callbacks)
-        else
-          response_callbacks.invalid_parameters(validator.errors.join(' '))
-        end
-
-        results << result
-      end
-
-      results.compact!
-
-      if results.size == 0
-        nil
-      elsif batch
-        results
-      else
-        results.first
-      end
+    def rpc_methods
+      (public_methods.map(&:to_s) - NON_RPC_METHODS) - Object.public_methods.map(&:to_s)
     end
 
   end

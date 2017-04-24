@@ -20,6 +20,11 @@ module Jsonrpc
     def error code, msg, data=nil
       return nil if notification?
 
+      if ErrorCodes::NON_APPLICATION_ERRORS.include?(code) || !code.is_a?(Integer)
+        # log this?
+        internal_error
+      end
+
       error = {
         'jsonrpc' => '2.0',
         'id' => @request['id'],
@@ -32,19 +37,19 @@ module Jsonrpc
       error
     end
 
-    def internal_error msg='internal error', data=nil
-      error(Jsonrpc::ErrorCodes::INTERNAL_ERROR, msg, data)
-    end
-
     def invalid_parameters msg="invalid parameters", data=nil
       if !@request.is_a?(Hash)
         @request = {'id' => nil}
       end
-      error(Jsonrpc::ErrorCodes::INVALID_REQUEST, msg, data)
+      error(ErrorCodes::INVALID_REQUEST, msg, data)
+    end
+
+    def internal_error msg='internal error', data=nil
+      error(ErrorCodes::INTERNAL_ERROR, msg, data)
     end
 
     def method_not_found msg='Method not found', data=nil
-      error(Jsonrpc::ErrorCodes::METHOD_NOT_FOUND, msg, data)
+      error(ErrorCodes::METHOD_NOT_FOUND, msg, data)
     end
 
     private

@@ -1,28 +1,65 @@
 # Jsonrpc
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/jsonrpc`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+Jsonrpc is a framework for creating jsonrpc 2.0 servers while being totally transport agnostic.
 
 ## Installation
 
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'jsonrpc'
-```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install jsonrpc
+TODO
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+
+class MyRequestHandler < Jsonrpc::RequestHandler
+
+  def my_method params
+    my_private_method params
+  end
+
+  def validated_method params
+    if params.nil?
+      @callbacks.invalid_parameters('custom message')
+    else
+      params
+    end
+  end
+
+  private
+
+  def my_private_method params
+    params
+  end
+
+end
+
+engine = Jsonrpc::Engine.new(handlers: {
+  'My' => MyRequestHandler
+})
+
+
+engine.handle(raw_json_request, state) do |response_hash|
+  puts response_hash.to_json
+end
+
+# '"jsonrpc":"2.0", "method":"my_method", "id":"1", "params":"5"'
+# {"jsonrpc" => "2.0", "result" => "5", "id" => "1"}
+
+# '"jsonrpc":"2.0", "method":"my_method", "id":"1", "params":"5"'
+# {"jsonrpc" => "2.0", "result" => "5", "id" => "1"}
+
+# '"jsonrpc":"2.0", "method":"validated_params", "id":"1", "params":null'
+# {"jsonrpc" => "2.0", "error" => {"code": -32600, "message":"custom message"}, "id" => "1"}
+```
+
+### Available Callbacks
+
+```ruby
+success(result) # default action of method response
+error(code, message, data) # custom errors
+internal_error(message, data) # default action of uncaught exceptions
+invalid_parameters(message, data)
+method_not_found(message, data)
+```
 
 ## Development
 
@@ -32,8 +69,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/Cody Gustafson/jsonrpc. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
-
+Bug reports and pull requests are welcome on GitHub at https://github.com/codygustafson/jsonrpc. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 ## License
 
