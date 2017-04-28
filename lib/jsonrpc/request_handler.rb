@@ -8,6 +8,7 @@ module Jsonrpc
     NON_RPC_METHODS = ['rpc_send']
 
     def initialize state, callbacks
+      @state = state
       @callbacks = callbacks
     end
 
