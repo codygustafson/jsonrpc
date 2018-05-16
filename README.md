@@ -1,6 +1,6 @@
 # Jsonrpc
 
-Jsonrpc is a framework for creating jsonrpc 2.0 servers while being totally transport agnostic.
+Jsonrpc is a framework for creating jsonrpc 2.0 servers while being transport agnostic.
 
 ## Installation
 
